@@ -1,0 +1,21 @@
+#sql两表的创建--->复制以下代码到sql 创建表格!
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT,
+    mobile VARCHAR(20) NOT NULL,
+    password VARCHAR(200) NOT NULL,  /*假设密码字段是散列过后存储的，对应的散列值可能会比较长*/
+    real_name VARCHAR(100),
+    role VARCHAR(50),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT,
+    url VARCHAR(200) NOT NULL,
+    count INT,
+    status VARCHAR(30),
+    user_id INT,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
