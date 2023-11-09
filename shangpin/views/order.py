@@ -15,12 +15,12 @@ def login():
     #进入到了订单页面
 
     data =order_findall(user_info['id'],user_info['role'])
-    #状态码的转中文
+    #状态码的转中文/颜色
     status_dict={
-        1:'等待',
-        2:"正在运行",
-        3:"完成",
-        4:"失败"
+        1: {"sta":'等待',"col":"warning"},
+        2: {"sta":"正在运行","col":"info"},
+        3: {"sta":"完成","col":"success"},
+        4: {"sta":"失败","col":"danger"}
     }
     print(data[0]['user_name'])
 
