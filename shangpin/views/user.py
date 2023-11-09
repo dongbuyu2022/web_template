@@ -24,7 +24,7 @@ def login():
     # print(f'人员:{role};  手机号:{mobile};   密码:{pwd}')
 
     #*******************进入数据库查询*****************************
-    result = mysql.users_find((role,pwd,mobile))
+    result = mysql.users_find_login((role,pwd,mobile))
     if result:
         #"登录成功" --->跳转到其他页面
         # print(result)

@@ -39,13 +39,38 @@ pool = PooledDB(
 )
 
 
-def users_find(values):
+def users_find_login(values):
+    #登录页面的用户查询
     conn =pool.connection()
     # cursor = conn.cursor()
     cursor = conn.cursor(cursors.DictCursor) #让他返回一个字典 而不是列表
     query = f"select * from users where role=%s and password=%s and mobile=%s"
     cursor.execute(query, values)
     result =cursor.fetchone()  #如果用fetall()的话,返回的是列表,不能直接干字典
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return result
+
+def order_findall(id,role):
+    #根据用户信息,对商品页面的查询,id为用户的id,role为用户属性
+    conn = pool.connection()
+    # cursor = conn.cursor()
+    cursor = conn.cursor(cursors.DictCursor)  # 让他返回一个字典 而不是列表
+    #当role=2的时候,表示管理员,就全部返回
+    result=[]
+    if role==2:
+
+        query = f"select * from orders"
+        cursor.execute(query, [])
+        result = cursor.fetchall()
+
+    else:
+        query = "select * from orders where user_id=%s"
+        cursor.execute(query, id)
+        result = cursor.fetchall()
+
     conn.commit()
     cursor.close()
     conn.close()
