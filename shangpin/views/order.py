@@ -5,7 +5,7 @@ ac = Blueprint("order",__name__)
 
 
 @ac.route('/order/list')
-def login():
+def order_list():
     #读取用户的cookie and 解密获取
     user_info = session.get("user_info")
 
@@ -32,5 +32,15 @@ def login():
     return yemian
 
 @ac.route('/order/create')
-def users():
-    return "创建订单"
+def create_order():
+    # 读取用户的cookie and 解密获取
+    user_info = session.get("user_info")
+
+    if not user_info:
+        # 验证cookie! 如果不行就跳转--->登录页面
+        return redirect('/login')
+    # 进入到了订单页面
+
+    data = order_findall(user_info['id'], user_info['role'])
+
+    return render_template('create_order.html',data_list = data)

@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="/static/bootstrap-3.4.1-dist/css/bootstrap.css">
+    <style>
+        .form-group {
+            margin-bottom: 15px; /* 如果你想要上下都有间距，你可以只用 margin */
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+    </style>
+
 </head>
 <body>
 <nav class="navbar navbar-default">
@@ -66,49 +74,52 @@
     </div><!-- /.container-fluid -->
 </nav>
 <div class="container">
-    <div class="table-responsive">
-        <div style="margin-bottom: 10px">
-<!--            跳转到添加订单页面-->
-            <a class="btn btn-primary" href="/order/create">
+    <div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading"> <h3>订单面板</h3></div>
 
-           <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>添 加</a>
-        </div>
-        <table class="table table-striped">
-            <!--      表头列表-->
-            <thead>
-
-            <tr>
-                <th>ID</th>
-                <th>URL</th>
-                <th>COUNT</th>
-                <th>STATUS</th>
-                <th>USER_ID</th>
-            </tr>
-
-
-            </thead>
-            <tbody>
-            <!--      获取表格数据,进行循环-->
-            {% for item in data_list %}
-            <tr>
-                <th>{{item.id}}</th>
-                <th>{{item.url}}</th>
-                <th>{{item.count}}</th>
-                <!--            数字转文字的动态和颜色变化-->
-                <th>
-              <span class="label label-{{ status_dict[item.status].col }}">
-              {{ status_dict[item.status].sta }}
-          </span>
-                </th>
-                <th>{{item.user_id}}</th>
-
-            </tr>
-            {% endfor %}
-            </tbody>
-
-
-        </table>
+    <!-- Table -->
+    <table class="table">
+        <form>
+    <div class="form-group">
+        <label>URL</label>
+        <input type="text" class="form-control" placeholder="请输入/粘贴 订单url,例如:www.xxx.com">
     </div>
+    <div class="form-group">
+        <label>数 量</label>
+        <select class="form-control">
+            <option value="10">10</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="300">300</option>
+            <option value="500">500</option>
+        </select>
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" id="confirmCheckbox"> 请再次确认您的订单
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary" id="submitButton" disabled>提 交</button>
+</form>
+
+<script>
+    // 当没有勾选框框的时候,就没办法点击提交的业务逻辑
+document.getElementById('confirmCheckbox').addEventListener('click', function() {
+    if(document.getElementById('confirmCheckbox').checked) {
+        document.getElementById('submitButton').removeAttribute('disabled');
+    } else {
+        document.getElementById('submitButton').setAttribute('disabled', 'disabled');
+    }
+});
+</script>
+
+    </table>
+</div>
+
+
+
+
 </div>
 <script src="/static/jquery-3.7.1.min.js"></script>
 <script src="/static/bootstrap-3.4.1-dist/js/bootstrap.js"></script>
