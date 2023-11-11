@@ -20,7 +20,8 @@ def order_list():
         1: {"sta":'等待',"col":"warning"},
         2: {"sta":"正在运行","col":"info"},
         3: {"sta":"完成","col":"success"},
-        4: {"sta":"失败","col":"danger"}
+        4: {"sta":"失败","col":"danger"},
+        100: {"sta":"未知","col":"default"}
     }
 
 
