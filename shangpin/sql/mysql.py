@@ -91,3 +91,4 @@ def order_insert(user_id,user_name,url,count,status):
     AutoAdd_id = cursor.lastrowid     #拿到插入的这个自增id
     return str(AutoAdd_id)  #返回这个自增id
 
+

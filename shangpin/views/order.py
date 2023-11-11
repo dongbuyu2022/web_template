@@ -1,4 +1,4 @@
-from flask import Blueprint,session,redirect,render_template,request
+from flask import Blueprint,session,redirect,render_template,request,flash
 from ..sql.mysql import order_findall,order_insert
 #蓝图对象
 ac = Blueprint("order",__name__)
@@ -47,5 +47,12 @@ def create_order():
     count = request.form.get("count")
 
     order_id = order_insert(user_info['id'],user_info['real_name'],url,count,status=1)
+    #当订单提交成功,则跳转到订单列表中
+    if order_id:
 
-    return f"订单已经提交,订单号:{order_id}"
+        return redirect('/order/list')
+    else:
+        flash('后台程序有误!请重新输入订单')  # 发送一次性警告消息
+        return redirect('/order/create')  # 重定向回创建订单页面
+
+

@@ -3,7 +3,21 @@
 
 {%block body%}
 
-    <div class="panel panel-default">
+
+<div class="panel panel-default">
+    <!-- 添加flashes,警告消息 -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flashes">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+
+
     <!-- Default panel contents -->
     <div class="panel-heading"> <h3>订单面板</h3></div>
 
