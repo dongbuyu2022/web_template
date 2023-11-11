@@ -10,7 +10,7 @@ host = 'localhost'  # 数据库主机地址
 port = 3306  # 数据库的端口号
 user = 'root'  # 数据库登录用户名
 password = '123456'  # 对应的登录密码
-database = 'ipproxy'  # 需要连接的数据库名称
+database = 'flask'  # 需要连接的数据库名称
 charset = 'utf8'  # 数据库字符集（编码）
 
 '''
@@ -47,7 +47,7 @@ def users_find_login(values):
     query = f"select * from users where role=%s and password=%s and mobile=%s"
     cursor.execute(query, values)
     result =cursor.fetchone()  #如果用fetall()的话,返回的是列表,不能直接干字典
-    conn.commit()
+    # conn.commit()   #查询的时候,不需要提交事务
     cursor.close()
     conn.close()
 
@@ -71,8 +71,23 @@ def order_findall(id,role):
         cursor.execute(query, id)
         result = cursor.fetchall()
 
-    conn.commit()
+    # conn.commit()  #不是增删改,不需要提交事务
     cursor.close()
     conn.close()
 
     return result
+
+def order_insert(user_id,user_name,url,count,status):
+    #根据用户信息,对商品页面的查询,id为用户的id,role为用户属性
+    conn = pool.connection()
+    cursor = conn.cursor()
+    query = f"insert into orders(`user_id`,`user_name`,`url`,`count`,`status`) values(%s,%s,%s,%s,%s)"
+
+    values=[user_id,user_name,url,count,status]
+    cursor.execute(query, values)
+    conn.commit()  # 不是增删改,不需要提交事务
+    cursor.close()
+    conn.close()
+    AutoAdd_id = cursor.lastrowid     #拿到插入的这个自增id
+    return str(AutoAdd_id)  #返回这个自增id
+
