@@ -12,18 +12,21 @@
         <form method="post">
     <div class="form-group">
         <label>URL</label>
-        <input type="text" class="form-control" placeholder="请输入/粘贴 订单url,例如:www.xxx.com" name="url">
+        <input type="text" class="form-control" placeholder="请输入/粘贴 订单url,例如:www.xxx.com" name="url" pattern="^http.*" required title="输入格式有误">
+
     </div>
     <div class="form-group">
-        <label>数 量</label>
-        <select class="form-control" name="count">
-            <option value="10">10</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="300">300</option>
-            <option value="500">500</option>
-        </select>
-    </div>
+    <label>数 量</label>
+    <input type="number" class="form-control" list="counts" name="count" min="1" placeholder="选择或输入数量">
+    <datalist id="counts">
+        <option value="10">
+        <option value="50">
+        <option value="100">
+        <option value="300">
+        <option value="500">
+    </datalist>
+</div>
+
     <div class="checkbox">
         <label>
             <input type="checkbox" id="confirmCheckbox"> 请再次确认您的订单
@@ -41,6 +44,19 @@ document.getElementById('confirmCheckbox').addEventListener('click', function() 
         document.getElementById('submitButton').setAttribute('disabled', 'disabled');
     }
 });
+
+    // 当网页输入不是以http开头,就提示输入格式有误
+    document.querySelector('input[name="url"]').addEventListener('input', function(e) {
+    var urlInput = e.target;
+    var pattern = /^http/;
+    if(pattern.test(urlInput.value)) {
+        urlInput.setCustomValidity('');
+    } else {
+        urlInput.setCustomValidity('输入格式有误,请检查你提交的url');
+    }
+});
+
+
 </script>
 
     </table>
