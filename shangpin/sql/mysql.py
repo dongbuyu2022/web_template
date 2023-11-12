@@ -1,6 +1,7 @@
 from dbutils.pooled_db import PooledDB
 import pymysql
 from pymysql import cursors
+import logging
 
 '''
 **********************************需要修改的地方*********************************************
@@ -39,19 +40,20 @@ pool = PooledDB(
 )
 
 
+# 示例改进：使用with语句来自动处理连接关闭
 def users_find_login(values):
     #登录页面的用户查询
-    conn =pool.connection()
-    # cursor = conn.cursor()
-    cursor = conn.cursor(cursors.DictCursor) #让他返回一个字典 而不是列表
-    query = f"select * from users where role=%s and password=%s and mobile=%s"
-    cursor.execute(query, values)
-    result =cursor.fetchone()  #如果用fetall()的话,返回的是列表,不能直接干字典
-    # conn.commit()   #查询的时候,不需要提交事务
-    cursor.close()
-    conn.close()
+    try:
+        with pool.connection() as conn:
+            with conn.cursor(cursors.DictCursor) as cursor:
+                query = "SELECT * FROM users WHERE role=%s AND password=%s AND mobile=%s"
+                cursor.execute(query, values)
+                result = cursor.fetchone()
+                return result
+    except Exception as e:
+        logging.error(f"Database error during user login fetch: {e}")
+        return None
 
-    return result
 
 def order_findall(id,role):
     #根据用户信息,对商品页面的查询,id为用户的id,role为用户属性
@@ -91,4 +93,41 @@ def order_insert(user_id,user_name,url,count,status):
     AutoAdd_id = cursor.lastrowid     #拿到插入的这个自增id
     return str(AutoAdd_id)  #返回这个自增id
 
+
+def unexecuted_orders_for_work():
+    # 返回status<=2的数据
+    # 根据用户信息,对商品页面的查询,id为用户的id,role为用户属性
+    conn = pool.connection()
+    # cursor = conn.cursor()
+    cursor = conn.cursor(cursors.DictCursor)  # 让他返回一个字典 而不是列表
+    # 当role=2的时候,表示管理员,就全部返回
+    result = []
+
+    query = "select * from orders where status <= %s"
+    cursor.execute(query, 2)
+    result = cursor.fetchall()
+
+
+    # conn.commit()  #不是增删改,不需要提交事务
+    cursor.close()
+    conn.close()
+
+    return result
+
+
+def update_task_final_in_sql(task):
+    conn = pool.connection()  # 假设 `pool` 已经定义为连接池
+    cursor = conn.cursor()
+    update_query = "UPDATE orders SET status = %s WHERE id = %s"
+
+    try:
+        cursor.execute(update_query, (3, task['id']))  # 更新任务status为3
+        conn.commit()  # 提交事务
+        # print(f"任务ID {task['id']} 的状态已更新为3")
+    except Exception as e:
+        print("数据库操作出错:", e)
+        conn.rollback()  # 出错时回滚
+    finally:
+        cursor.close()
+        conn.close()
 

@@ -1,5 +1,7 @@
 import redis
 import json
+from redis.exceptions import ResponseError
+import logging
 
 # 创建连接池
 # 参数说明:
@@ -15,24 +17,77 @@ pool = redis.ConnectionPool(
     encoding='utf-8',
     decode_responses=True
 )
+
+# push_queue 函数，把列表中的每个订单单独推入Redis队列：
 def push_queue(value):
     # 创建Redis连接对象，使用的时候会从连接池中获取连接
     r = redis.Redis(connection_pool=pool)
-    #json.dumps(value)--->对value进行编码,怕他格式有问题
-    r.lpush('que',json.dumps(value))
+    for item in value:  # 迭代传入的列表
+        item_de = json.dumps(item)  # 对单个订单进行编码
+        r.lpush('work', item_de)  # 将编码后的单个订单推入队列
 
-def pushed_value():
-    # 创建Redis连接对象，使用的时候会从连接池中获取连接
+
+# 示例改进：异常处理和日志记录
+def pop_queue():
     r = redis.Redis(connection_pool=pool)
-    # 从队列中获取最新的元素
-    last_value = r.lindex('que', 0)
-    # 打印最新的元素
-    if last_value is not None:
-        # 假设存储的是JSON字符串，需要解码成Python对象
-        value_obj = json.loads(last_value)
-        print(value_obj)
+    while True:
+        try:
+            task_json = r.rpop('work')
+            if task_json:
+                yield json.loads(task_json)
+            else:
+                logging.info("队列为空，等待/生成新任务.")
+                break
+        except Exception as e:
+            logging.error(f"Error popping from Redis queue: {e}")
+            continue  # 继续尝试下一个工作，而不是退出循环
+
+
+
+
+
+
+
+
+def work_pop_queue(task):
+    # 为Run_in_BackGround提取任务
+    r = redis.Redis(connection_pool=pool)
+    result = r.brpop(task, timeout=10)
+
+    if result:
+        # result可能是(key, value)格式的元组，这里我们只需要第二个元素
+        _, data = result  # 使用"_"来忽略不需要的第一个元素（队列的名称）
+
+        # 确保数据是字符串，之后再加载，如果需要可以增加额外的错误处理
+        if isinstance(data, bytes):
+            data = data.decode('utf-8')  # 或使用你知道用于编码的具体编码
+
+        # data现在应该是一个JSON格式的字符串，可以被loads
+        value_obj = json.loads(data)
+        return value_obj
     else:
-        print("队列为空")
+        # 如果没有数据返回，可以选择返回None或者其他值或者抛出异常
+        return None
+
+
+
+def find_order_in_redis():
+    r = redis.Redis(connection_pool=pool)
+
+    keys = r.keys('*')
+
+    for key in keys:
+        try:
+            # 检查该key是否有值，不管它的类型是什么
+            if r.exists(key):
+
+                return key
+        except ResponseError as e:
+            # 在这里处理异常情况或记录日志
+            print(f"An error occurred: {e}")
+            continue
+    return None
+
 
 
 

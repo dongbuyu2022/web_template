@@ -35,7 +35,7 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             success = True
         else:
-            errors[file.filename] = '文件类型错误'
+            errors[file.filename] = '文件有问题'
 
     if success and errors:
         errors['message'] = '一半成功一半失败,请查验'
