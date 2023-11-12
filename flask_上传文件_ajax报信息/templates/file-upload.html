@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+	<title>上传文件到服务器_基础框架</title>
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+	<h2>上传文件到X盘</h2>
+	<dl>
+		<p>
+			<p id="msg"></p>
+			<input type="file" id="multiFiles" name="files[]" multiple="multiple"/>
+			<button id="upload">上 传</button>
+		</p>
+	</dl>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('#upload').on('click', function () {
+				var form_data = new FormData();
+				var ins = document.getElementById('multiFiles').files.length;
+				var outputMsg = $('#msg');
+
+				if(ins == 0) {
+					outputMsg.html('<span style="color:red">你至少也要选择一个文件来上传吧</span>');
+					return;
+				}
+
+				for (var x = 0; x < ins; x++) {
+					form_data.append("files[]", document.getElementById('multiFiles').files[x]);
+				}
+
+				$.ajax({
+					url: '/upload', // point to server-side URL
+					dataType: 'json', // what to expect back from the server
+					cache: false,
+					contentType: false,
+					processData: false,
+					data: form_data,
+					type: 'post',
+					success: function (response) {
+						outputMsg.html('');
+						$.each(response, function (key, data) {
+							outputMsg.append('<span style="color:greenyellow;">' + key + ' -> ' + data + '</span><br>');
+
+						});
+					},
+					error: function (xhr) {
+						var resp = JSON.parse(xhr.responseText);
+						outputMsg.html('<span style="color:red">' + resp.message + '</span>');
+					}
+				});
+			});
+		});
+	</script>
+</body>
+</html>
