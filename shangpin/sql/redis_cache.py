@@ -9,14 +9,35 @@ import logging
 # port: Redis服务器的端口，默认为6379
 # db: 要访问的数据库号，默认为0
 # max_connections: 连接池允许的最大连接数，超过这个数就会等待，而不是立即得到一个连接，默认没有限制
-pool = redis.ConnectionPool(
-    host='localhost',
-    port=6379,
-    db=0,
-    max_connections=10,
-    encoding='utf-8',
-    decode_responses=True
-)
+
+
+pool=None
+
+
+import redis
+
+def init_redis_db(config):
+    # 初始化连接redis池
+
+    global pool
+
+    # 使用字典解包的方式传递配置参数
+    pool_kwargs = {
+        'host': config['host'],
+        'port': int(config['port']),
+        'db': 0,
+        'max_connections': 10,
+        'decode_responses': True
+    }
+
+    # 如果有密码就添加密码,没有就不添加
+    if 'password' in config and config['password']:
+        pool_kwargs['password'] = config['password']
+
+
+
+    pool = redis.ConnectionPool(**pool_kwargs)
+
 
 # push_queue 函数，把列表中的每个订单单独推入Redis队列：
 def push_queue(value):
@@ -39,7 +60,7 @@ def pop_queue():
                 logging.info("队列为空，等待/生成新任务.")
                 break
         except Exception as e:
-            logging.error(f"Error popping from Redis queue: {e}")
+            logging.error(f"redis提取页面`pop_queue`出现问题: {e}")
             continue  # 继续尝试下一个工作，而不是退出循环
 
 
@@ -84,7 +105,7 @@ def find_order_in_redis():
                 return key
         except ResponseError as e:
             # 在这里处理异常情况或记录日志
-            print(f"An error occurred: {e}")
+            logging.error(f"redis查询订单`find_order_in_redis`出现问题: {e}")
             continue
     return None
 

@@ -60,4 +60,10 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    import sys
+    # run()
+
+    print(sys.argv[0])
+
+
+
