@@ -51,7 +51,7 @@ def users_find_login(values):
                 result = cursor.fetchone()
                 return result
     except Exception as e:
-        logging.error(f"Database error during user login fetch: {e}")
+        logging.error(f"数据库在登录页出错: {e}")
         return None
 
 
@@ -94,6 +94,37 @@ def order_insert(user_id,user_name,url,count,status):
     return str(AutoAdd_id)  #返回这个自增id
 
 
+def order_find_sorted(user_id, user_name, sort_by, sort_order):
+    conn = pool.connection()
+    cursor = conn.cursor()
+
+    # 定义一个允许进行排序的字段集合，以防止 SQL 注入
+    allowed_sort_fields = {'id', 'date', 'status', ...}  # ...代表其他可能的字段
+    # 确保提供的排序键是有效的
+    if sort_by not in allowed_sort_fields:
+        raise ValueError("无效的排序字段")
+
+    # 定义排序顺序，只允许 'asc' 或 'desc'
+    if sort_order.lower() not in ('asc', 'desc'):
+        raise ValueError("无效的排序字段")
+
+    try:
+        # 通过安全的方式构建 SQL 查询语句
+        sql = "SELECT * FROM orders WHERE user_id = %s and user_name = %s ORDER BY " + sort_by + " " + sort_order
+        cursor.execute(sql, (user_id, user_name))
+        result = cursor.fetchall()
+        return result
+    except Exception as e:
+        logging.error(f"数据库在数据排序时出错: {e}")
+        conn.rollback()  # 出错时回滚
+        return None
+    finally:
+        # 因为如果try中的 cursor.close() 执行了，那么 finally 中的 cursor.close() 就会抛出异常，因为对象已经关闭
+        # 所以我们就保留 finally 中的 cursor.close() 和 conn.close()
+        cursor.close()
+        conn.close()
+
+
 def unexecuted_orders_for_work():
     # 返回status<=2的数据
     # 根据用户信息,对商品页面的查询,id为用户的id,role为用户属性
@@ -125,7 +156,7 @@ def update_task_final_in_sql(task):
         conn.commit()  # 提交事务
         # print(f"任务ID {task['id']} 的状态已更新为3")
     except Exception as e:
-        print("数据库操作出错:", e)
+        logging.error(f"数据库在更新任务到sql时出错: {e}")
         conn.rollback()  # 出错时回滚
     finally:
         cursor.close()

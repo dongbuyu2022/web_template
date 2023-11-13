@@ -21,7 +21,7 @@ def order_list():
         2: {"sta":"正在运行","col":"info"},
         3: {"sta":"完成","col":"success"},
         4: {"sta":"失败","col":"danger"},
-        100: {"sta":"未知","col":"default"}
+        5: {"sta":"未知","col":"default"}
     }
 
 
@@ -54,5 +54,3 @@ def create_order():
     else:
         flash('后台程序有误!请重新输入订单')  # 发送一次性警告消息
         return redirect('/order/create')  # 重定向回创建订单页面
-
-
