@@ -1,5 +1,5 @@
-from flask import Blueprint,session,redirect,render_template,request,flash
-from ..sql.mysql import order_findall,order_insert
+from flask import Blueprint,session,redirect,render_template,request,flash,jsonify
+from ..sql.mysql import order_findall,order_insert,get_paginated_orders
 #蓝图对象
 ac = Blueprint("order",__name__)
 
@@ -15,6 +15,7 @@ def order_list():
     #进入到了订单页面
 
     data =order_findall(user_info['id'],user_info['role'])
+
     #状态码的转中文/颜色
     status_dict={
         1: {"sta":'等待',"col":"warning"},
@@ -30,6 +31,12 @@ def order_list():
 
 
     return yemian
+
+
+
+
+
+
 
 @ac.route('/order/create',methods = ["GET","POST"])
 def create_order():

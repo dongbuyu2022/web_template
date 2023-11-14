@@ -2,25 +2,61 @@
 
 
 {%block body%}
+<style>
+    .small-select {
+        height: 20px;
+        padding: 1px 3px;
+        font-size: 12px;
+        line-height: 1;
+    }
+</style>
+
 
 <div class="container">
     <div class="table-responsive">
         <div style="margin-bottom: 10px">
-<!--            跳转到添加订单页面-->
+            <!--            跳转到添加订单页面-->
             <a class="btn btn-primary" href="/order/create">
 
-           <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>添 加</a>
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>添 加</a>
         </div>
         <table class="table table-striped">
             <!--      表头列表-->
             <thead>
 
             <tr>
-                <th>ID</th>
-                <th>URL</th>
-                <th>COUNT</th>
-                <th>STATUS</th>
-                <th>USER_ID</th>
+                <th>订单ID</th>
+                <th>订单URL</th>
+                <!--                <th onclick="sortTable(2)">COUNT</th>-->
+                <th>
+                    订单数量
+                    <select onchange="sortTable(this, 2)" class="small-select">
+                        <option value="asc">升序</option>
+                        <option value="desc">降序</option>
+                    </select>
+                </th>
+
+                <th>
+                    状态
+                    <select onchange="filterTable(this)" class="small-select">
+                        <option value="all">全 部</option>
+                        <option value="1">等 待</option>
+                        <option value="2">正在运行</option>
+                        <option value="3">完 成</option>
+                        <option value="4">失 败</option>
+                        <option value="5">未 知</option>
+                    </select>
+                </th>
+
+
+                <th>
+                    创建时间
+                    <select onchange="sortTableByDate(this, 4)" class="small-select">
+                        <option value="asc">升序</option>
+                        <option value="desc">降序</option>
+                    </select>
+                </th>
+
             </tr>
 
 
@@ -32,21 +68,138 @@
                 <th>{{item.id}}</th>
                 <th>{{item.url}}</th>
                 <th>{{item.count}}</th>
-                <!--            数字转文字的动态和颜色变化-->
-                <th>
-              <span class="label label-{{ status_dict[item.status].col }}">
-              {{ status_dict[item.status].sta }}
-          </span>
+                <!--                状态栏status的选择,第一需要他的序列来做为选择,第二是为了动态颜色-->
+                <th data-status="{{ item.status }}">
+  <span class="label label-{{ status_dict[item.status].col }}">
+  {{ status_dict[item.status].sta }}
+  </span>
                 </th>
-                <th>{{item.user_id}}</th>
+
+
+                <th>{{item.created_time}}</th>
 
             </tr>
+
+
             {% endfor %}
             </tbody>
 
 
+
         </table>
-    </div>
+
+
+
+
 </div>
 
+
+
+
+<script>
+    // region订单数量栏的升降序排列
+    function sortTable(select, n) {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        var dir = select.value; // 取得选中的排序方式
+        table = document.querySelector(".table");
+        switching = true;
+        // 无需再确定排序的方向，因为已由下拉框提供
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TH")[n];
+                y = rows[i + 1].getElementsByTagName("TH")[n];
+                if (dir == "asc") {
+                    if (parseInt(x.innerHTML) > parseInt(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (parseInt(x.innerHTML) < parseInt(y.innerHTML)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+    //endregion
+
+    //region 状态栏的筛选
+    function filterTable(select) {
+        var filterValue = select.value;
+        var table = document.querySelector(".table");
+        var tr = table.getElementsByTagName("tr");
+
+        // 遍历所有行（跳过表头）
+        for (var i = 1; i < tr.length; i++) {
+            var td = tr[i].getElementsByTagName("th")[3]; // 基于 STATUS 列的索引位置
+            if (td) {
+                var statusValue = td.getAttribute('data-status'); // 假设你设置了 data-status attribute
+                if (filterValue == "all" || statusValue == filterValue) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+    //endregion
+
+    // region   创建时间 栏上的 升降序排列
+    function convertDateTime(dateTimeStr) {
+        // 将日期时间字符串分割成日期和时间
+        var parts = dateTimeStr.split(' ');
+        var dateParts = parts[0].split('-');
+        var timeParts = parts[1].split(':');
+
+        // 构建一个新的日期对象
+        return new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], timeParts[2]);
+    }
+
+    function sortTableByDate(select, columnIndex) {
+        var table = select.parentNode.parentNode.parentNode.parentNode;
+        var tbody = table.tBodies[0];
+        var rows = Array.from(tbody.rows);
+
+        // 根据选择框来决定排序方式（升序或降序）
+        var sortOrder = select.value;
+
+        // 实际的排序逻辑
+        rows.sort(function(a, b) {
+            // 对于每一行，提取并转换日期时间字符串，然后使用日期比较
+            var dateA = convertDateTime(a.cells[columnIndex].textContent.trim());
+            var dateB = convertDateTime(b.cells[columnIndex].textContent.trim());
+
+            // 根据排序顺序返回比较结果
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        // 将排序过的行重新添加到tbody中
+        rows.forEach(function(row) {
+            tbody.appendChild(row);
+        });
+    }
+    //endregion
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
 {%endblock%}
+</div>

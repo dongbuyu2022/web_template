@@ -6,17 +6,20 @@ CREATE TABLE users (
     password VARCHAR(200) NOT NULL,  /*假设密码字段是散列过后存储的，对应的散列值可能会比较长*/
     real_name VARCHAR(100),
     role VARCHAR(50),
+    created_time datetime DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE orders (
-    id INT AUTO_INCREMENT,
-    url VARCHAR(200) NOT NULL,
-    count INT,
-    status INT DEFAULT 5 NOT NULL,
-    user_id INT,
-    user_name VARCHAR(200),
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `user_name` varchar(255) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `count` int(11) NOT NULL,
+  `status` int(11) NOT NULL,
+  `created_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 );
+
 

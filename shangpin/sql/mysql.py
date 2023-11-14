@@ -73,6 +73,7 @@ def order_findall(id,role):
     cursor.close()
     conn.close()
 
+
     return result
 
 def order_insert(user_id,user_name,url,count,status):
@@ -158,3 +159,29 @@ def update_task_final_in_sql(task):
         cursor.close()
         conn.close()
 
+
+
+def get_paginated_orders(page, page_size):
+    # 获取分页的总记录数
+    conn = pool.connection()
+    cursor = conn.cursor(cursors.DictCursor)  # 使用字典游标
+    try:
+        cursor.execute("SELECT COUNT(*) FROM orders")
+        total_count = cursor.fetchone()['COUNT(*)']
+        total_pages = (total_count + page_size - 1) // page_size  # 计算总页数
+
+        # 计算起始条目的索引
+        start = (page - 1) * page_size
+        # 获取当前页面的数据
+        query = "SELECT * FROM orders ORDER BY id LIMIT %s OFFSET %s"
+
+        cursor.execute(query, (page_size, start))
+        orders_list = cursor.fetchall()  # 获取订单数据列表，现在为字典列表
+    except Exception as e:
+        logging.error(f"在分页查询订单时出错: {e}")
+        return [], 0
+    finally:
+        cursor.close()
+        conn.close()
+
+    return orders_list, total_pages

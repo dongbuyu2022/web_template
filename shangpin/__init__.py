@@ -49,6 +49,11 @@ def create_app():
 
     app.register_blueprint(user.ac)
     app.register_blueprint(order.ac)
+
+
+
+
+
     app.template_global()(get_real_name)
 
     return app
