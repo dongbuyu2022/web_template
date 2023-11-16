@@ -50,6 +50,7 @@
     </style>
 
 </head>
+
 <body>
 <nav class="navbar navbar-default">
     <div class="container">
@@ -96,7 +97,7 @@
                 <li class="dropdown">
                     <!--          取出表格中用户的真实姓名 ,在全局变量中get_real_name()-->
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">用户: {{ get_real_name() }} <span class="caret"></span></a>
+                       aria-expanded="false">用户: {{ get_real_name() }}</a>
                     <!--          <ul class="dropdown-menu">-->
                     <!--              名字处的下拉选项-->
                     <!--            <li><a href="#">Action</a></li>-->
@@ -110,6 +111,8 @@
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
 </nav>
+
+
 <!--模版&ndash;&gt;占位符-->
 <div class="container">
     {%block body%}{%endblock%}

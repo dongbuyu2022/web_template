@@ -1,5 +1,5 @@
 from flask import Blueprint,session,redirect,render_template,request,flash,jsonify
-from ..sql.mysql import order_findall,order_insert,get_paginated_orders
+from ..sql.mysql import order_findall,order_insert
 #蓝图对象
 ac = Blueprint("order",__name__)
 
